@@ -173,7 +173,19 @@ triggerCryptoBtn.addEventListener('click', () => {
         return;
     }
 
-    // --- CARD GATEWAY TOGGLE & INSTITUTIONAL BLOCK ---
+
+    /* 
+    ---------------------------------------------------------
+    PLACEHOLDER INTERCEPT FOR PART 3
+    The fetch() call to the /verify_crypto endpoint will be 
+    injected here in Part 3.
+    ---------------------------------------------------------
+    */
+    console.log(`Crypto Verification Initiated. Internal TXN ID: ${generatedTxnId} | Blockchain TXID: ${txid}`);
+    alert("Verification request sent to server. Manual approval pending.");
+});
+
+// --- CARD GATEWAY TOGGLE & INSTITUTIONAL BLOCK ---
 const showCardBtn = document.getElementById('show-card');
 const cardUi = document.getElementById('card-ui');
 const triggerCardBtn = document.getElementById('trigger-card');
@@ -223,15 +235,4 @@ triggerCardBtn.addEventListener('click', () => {
     
     // Inject into DOM
     document.body.insertAdjacentHTML('beforeend', modalHtml);
-});
-
-    /* 
-    ---------------------------------------------------------
-    PLACEHOLDER INTERCEPT FOR PART 3
-    The fetch() call to the /verify_crypto endpoint will be 
-    injected here in Part 3.
-    ---------------------------------------------------------
-    */
-    console.log(`Crypto Verification Initiated. Internal TXN ID: ${generatedTxnId} | Blockchain TXID: ${txid}`);
-    alert("Verification request sent to server. Manual approval pending.");
 });
