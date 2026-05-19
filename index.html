@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UpnextAnalyst | Execution Infrastructure</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- HERO SECTION -->
+    <header id="hero">
+        <div class="terminal-overlay">
+            <canvas id="terminalCanvas"></canvas>
+        </div>
+        <div class="hero-content">
+            <div class="badge">SYS.ACTIVE // NODE: 4A-X9</div>
+            <h1>UpnextAnalyst: Institutional Grid Infrastructure</h1>
+            <p class="sub-headline">Access the algorithmic execution engine. By invitation only.</p>
+            <a href="#pricing" class="cta-btn">Request Node Access</a>
+        </div>
+    </header>
+
+    <!-- PERFORMANCE AUDIT SECTION -->
+    <section id="audit">
+        <h2 class="section-title">Performance Audit // 24-Month Backtest</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                        <th>Benchmark</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Net Profit Factor</td>
+                        <td class="data-highlight">2.14</td>
+                        <td>> 1.50</td>
+                    </tr>
+                    <tr>
+                        <td>Sharpe Ratio</td>
+                        <td class="data-highlight">2.41</td>
+                        <td>> 2.00</td>
+                    </tr>
+                    <tr>
+                        <td>Maximum Drawdown</td>
+                        <td class="data-warning">12.4%</td>
+                        <td>< 20.0%</td>
+                    </tr>
+                    <tr>
+                        <td>Win Rate (Short/Long)</td>
+                        <td class="data-highlight">68.0%</td>
+                        <td>> 60.0%</td>
+                    </tr>
+                    <tr>
+                        <td>Avg. Trade Duration</td>
+                        <td>4.2 Hours</td>
+                        <td>Intraday</td>
+                    </tr>
+                    <tr>
+                        <td>Recovery Factor</td>
+                        <td class="data-highlight">8.7</td>
+                        <td>> 5.0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="audit-actions">
+            <a href="#" class="secondary-btn">Download Full Audit PDF</a>
+            <span class="audit-note">*Based on EURUSD H1 tick data. Slippage modeled at 1.5 pips.</span>
+        </div>
+    </section>
+
+    <!-- PRICING / ACCESS SECTION -->
+    <section id="pricing">
+        <h2 class="section-title">Infrastructure Leasing</h2>
+        <div class="pricing-grid">
+            <!-- TIER 1 -->
+            <div class="pricing-card" data-amount="50" data-tier="standard">
+                <div class="tier-label">STANDARD NODE</div>
+                <div class="price-tag">$50</div>
+                <div class="lease-term">1-Month Lease</div>
+                <ul class="feature-list">
+                    <li>Single MT4 Account HWID Lock</li>
+                    <li>Default Grid Parameters</li>
+                    <li>Basic Execution Log</li>
+                </ul>
+                <button class="select-tier-btn">Select Terminal</button>
+            </div>
+
+            <!-- TIER 2 -->
+            <div class="pricing-card featured" data-amount="120" data-tier="professional">
+                <div class="tier-label">PROFESSIONAL NODE</div>
+                <div class="price-tag">$120</div>
+                <div class="lease-term">3-Month Lease</div>
+                <ul class="feature-list">
+                    <li>Single MT4 Account HWID Lock</li>
+                    <li>Optimized Variable Grid Spacing</li>
+                    <li>Priority Discord Execution Feed</li>
+                </ul>
+                <button class="select-tier-btn">Select Terminal</button>
+            </div>
+
+            <!-- TIER 3 -->
+            <div class="pricing-card" data-amount="300" data-tier="lifetime">
+                <div class="tier-label">LIFETIME NODE</div>
+                <div class="price-tag gold">$300</div>
+                <div class="lease-term">Perpetual License</div>
+                <ul class="feature-list">
+                    <li>Lifetime HWID Transfers (Max 2/yr)</li>
+                    <li>Proprietary Risk Management Module</li>
+                    <li>Direct API Support Pipeline</li>
+                </ul>
+                <button class="select-tier-btn">Select Terminal</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- PAYMENT GATEWAY UI SECTION -->
+    <section id="checkout">
+        <div class="checkout-container">
+            <h2 class="section-title">Secure Checkout // <span id="checkout-amount-display">$0.00</span></h2>
+            
+            <!-- M-PESA UI -->
+            <div id="mpesa-ui" class="gateway-panel">
+                <p class="gateway-instructions">Enter the M-Pesa phone number registered to your device.</p>
+                <div class="input-group">
+                    <input type="tel" id="mpesa-phone" placeholder="2547XXXXXXXX" maxlength="12">
+                    <button id="trigger-mpesa" class="pay-btn mpesa-color">Pay via M-Pesa</button>
+                </div>
+                <div id="mpesa-status" class="status-box hidden"></div>
+            </div>
+
+            <!-- CRYPTO UI -->
+            <div id="crypto-ui" class="gateway-panel hidden">
+                <p class="gateway-instructions">Send exact amount to the address below. Manual verification required.</p>
+                <div class="crypto-details">
+                    <div class="address-block">
+                        <span class="crypto-label">BTC (Native SegWit)</span>
+                        <code id="btc-address">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</code>
+                    </div>
+                    <div class="address-block">
+                        <span class="crypto-label">USDT (TRC20)</span>
+                        <code id="usdt-address">TJYSqMhMr4BEoZ1G4wKVv1p8m4EjY6bvKN</code>
+                    </div>
+                </div>
+                <div class="manual-verify-group">
+                    <label>Transaction ID (For Tracking):</label>
+                    <input type="text" id="txn-id" readonly class="readonly-field">
+                    
+                    <label>Blockchain TXID:</label>
+                    <input type="text" id="crypto-txid" placeholder="Paste your TXID here...">
+                    
+                    <button id="trigger-crypto" class="pay-btn crypto-color">Verify Payment</button>
+                </div>
+            </div>
+
+            <!-- GATEWAY TOGGLE -->
+            <div class="gateway-toggles">
+                <button id="show-mpesa" class="toggle-btn active">M-Pesa (Instant)</button>
+                <button id="show-crypto" class="toggle-btn">Crypto (Manual)</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- RISK DISCLAIMER -->
+    <footer id="disclaimer">
+        <div class="disclaimer-trigger" onclick="document.getElementById('disclaimer-text').classList.toggle('expanded')">
+            <span>&#9888; HIGH-RISK WARNING: READ BEFORE PROCEEDING &#9888;</span>
+        </div>
+        <div id="disclaimer-text" class="disclaimer-body">
+            <p><strong>LEGAL DISCLAIMER & RISK DISCLOSURE:</strong> Trading foreign exchange on margin carries a high level of risk, and may not be suitable for all investors. The high degree of leverage available can work against you as well as for you. Before deciding to trade foreign exchange you should carefully consider your investment objectives, level of experience, and risk appetite. The possibility exists that you could sustain a loss of some or all of your initial investment and therefore you should not invest money that you cannot afford to lose.</p>
+            <p><strong>ALGORITHMIC & MARTINGALE MECHANICS DISCLOSURE:</strong> You acknowledge that the "UpnextAnalyst" Expert Advisor utilizes aggressive grid and positional averaging algorithms closely related to Martingale systems. While backtests demonstrate high win rates and controlled drawdowns under specific market conditions, <em>past performance is not indicative of future results</em>. In extreme, sustained trend-reversal scenarios outside of historical data parameters, grid systems mathematically risk exponential capital drawdown or complete account depletion (margin calls). There is no guarantee that the algorithm will maintain a positive equity curve in live market conditions subject to slippage, liquidity gaps, server latency, and broker manipulation. By purchasing access, you explicitly accept full liability for any financial losses incurred. The developers, distributors, and infrastructure providers of this software are absolved of all financial responsibility. This software is provided "as is" without any warranties, express or implied.</p>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 UpnextAnalyst Infrastructure. All mechanical rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
