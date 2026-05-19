@@ -138,6 +138,19 @@
 
             <!-- CRYPTO UI -->
             <div id="crypto-ui" class="gateway-panel hidden">
+                            <!-- CARD UI (INSTITUTIONAL BLOCK) -->
+            <div id="card-ui" class="gateway-panel hidden">
+                <p class="gateway-instructions">Corporate card processing via secure PCI-DSS compliant tunnel.</p>
+                <div class="input-group-vertical">
+                    <input type="text" id="card-name" placeholder="Name on Card">
+                    <input type="text" id="card-number" placeholder="4242 4242 4242 4242" maxlength="19">
+                    <div class="card-row">
+                        <input type="text" id="card-exp" placeholder="MM/YY" maxlength="5">
+                        <input type="text" id="card-cvc" placeholder="CVC" maxlength="4">
+                    </div>
+                    <button id="trigger-card" class="pay-btn card-color">Process Secure Payment</button>
+                </div>
+            </div>
                 <p class="gateway-instructions">Send exact amount to the address below. Manual verification required.</p>
                 <div class="crypto-details">
                     <div class="address-block">
@@ -162,8 +175,9 @@
 
             <!-- GATEWAY TOGGLE -->
             <div class="gateway-toggles">
-                <button id="show-mpesa" class="toggle-btn active">M-Pesa (Instant)</button>
-                <button id="show-crypto" class="toggle-btn">Crypto (Manual)</button>
+                <button id="show-mpesa" class="toggle-btn active">M-Pesa</button>
+                <button id="show-crypto" class="toggle-btn">Crypto</button>
+                <button id="show-card" class="toggle-btn">Card</button>
             </div>
         </div>
     </section>
