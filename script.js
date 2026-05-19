@@ -173,6 +173,58 @@ triggerCryptoBtn.addEventListener('click', () => {
         return;
     }
 
+    // --- CARD GATEWAY TOGGLE & INSTITUTIONAL BLOCK ---
+const showCardBtn = document.getElementById('show-card');
+const cardUi = document.getElementById('card-ui');
+const triggerCardBtn = document.getElementById('trigger-card');
+const cardNumberInput = document.getElementById('card-number');
+
+showCardBtn.addEventListener('click', () => {
+    cardUi.classList.remove('hidden');
+    mpesaUi.classList.add('hidden');
+    cryptoUi.classList.add('hidden');
+    showCardBtn.classList.add('active');
+    showMpesaBtn.classList.remove('active');
+    showCryptoBtn.classList.remove('active');
+});
+
+// Basic UI formatting for card number spaces
+cardNumberInput.addEventListener('input', (e) => {
+    let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+    let formattedValue = value.match(/.{1,4}/g);
+    e.target.value = formattedValue ? formattedValue.join(' ') : '';
+});
+
+// THE BLOCKOUT EXECUTION
+triggerCardBtn.addEventListener('click', () => {
+    if (selectedAmount === 0) {
+        alert("ERR: No pricing tier selected.");
+        return;
+    }
+
+    // Remove any existing modal
+    const existingModal = document.querySelector('.modal-overlay');
+    if (existingModal) existingModal.remove();
+
+    // Construct the Institutional Block Modal
+    const modalHtml = `
+        <div class="modal-overlay" id="blockModal">
+            <div class="modal-box">
+                <h3>// ACCESS PROTOCOL VIOLATION</h3>
+                <p>
+                    Direct card processing is currently restricted to KYC-verified institutional nodes. 
+                    To bypass this restriction and execute via Corporate Wire, or to utilize our 
+                    available Crypto/M-Pesa tunnels, contact infrastructure support.
+                </p>
+                <button class="modal-close-btn" onclick="document.getElementById('blockModal').remove()">ACKNOWLEDGE</button>
+            </div>
+        </div>
+    `;
+    
+    // Inject into DOM
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+});
+
     /* 
     ---------------------------------------------------------
     PLACEHOLDER INTERCEPT FOR PART 3
