@@ -115,4 +115,177 @@ showCryptoBtn.addEventListener('click', () => {
 
 // --- UTILITY: RANDOM ALPHANUMERIC GENERATOR ---
 function generateTxnId() {
-    const chars
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 16; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    generatedTxnId = result;
+    txnIdField.value = generatedTxnId;
+}
+
+// --- MANUAL M-PESA TRIGGER ---
+triggerMpesaBtn.addEventListener('click', () => {
+    const phone = document.getElementById('mpesa-phone').value;
+    const statusBox = document.getElementById('mpesa-status');
+    
+    if (!phone || phone.length < 10) {
+        statusBox.classList.remove('hidden');
+        statusBox.innerHTML = "ERR: Invalid phone number format.";
+        statusBox.style.borderColor = 'var(--danger)';
+        statusBox.style.color = 'var(--danger)';
+        return;
+    }
+
+    if (selectedAmount === 0) {
+        statusBox.classList.remove('hidden');
+        statusBox.innerHTML = "ERR: No pricing tier selected.";
+        statusBox.style.borderColor = 'var(--danger)';
+        statusBox.style.color = 'var(--danger)';
+        return;
+    }
+
+    const mpesaCode = prompt("Enter the M-Pesa Confirmation Code sent to your phone (e.g., SHK4Y5X7GZ):");
+
+    if (!mpesaCode || mpesaCode.length < 8) {
+        statusBox.classList.remove('hidden');
+        statusBox.innerHTML = "ERR: Invalid or empty M-Pesa code.";
+        statusBox.style.borderColor = 'var(--danger)';
+        statusBox.style.color = 'var(--danger)';
+        return;
+    }
+
+    statusBox.classList.remove('hidden');
+    statusBox.innerHTML = "PROCESSING: Logging settlement data...";
+    statusBox.style.borderColor = 'var(--accent-cyan)';
+    statusBox.style.color = 'var(--accent-cyan)';
+
+    fetch(`${RENDER_BACKEND_URL}/verify_mpesa`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            internal_txn_id: generatedTxnId,
+            mpesa_code: mpesaCode,
+            phone_number: phone,
+            amount: selectedAmount
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'logged') {
+            triggerMpesaBtn.disabled = true;
+            triggerMpesaBtn.innerText = 'SUBMITTED';
+            document.getElementById('mpesa-phone').disabled = true;
+            statusBox.innerHTML = "SUBMITTED: Code logged. Reconciling with M-Pesa ledger. Activation pending.";
+            statusBox.style.borderColor = 'var(--accent-gold)';
+            statusBox.style.color = 'var(--accent-gold)';
+        } else {
+            statusBox.innerHTML = `ERR: ${data.message}`;
+            statusBox.style.borderColor = 'var(--danger)';
+            statusBox.style.color = 'var(--danger)';
+        }
+    })
+    .catch(error => {
+        console.error('M-Pesa Log Error:', error);
+        statusBox.innerHTML = "NETWORK ERR: Cannot reach settlement processor.";
+        statusBox.style.borderColor = 'var(--danger)';
+        statusBox.style.color = 'var(--danger)';
+    });
+});
+
+// --- MANUAL CRYPTO VERIFICATION TRIGGER ---
+triggerCryptoBtn.addEventListener('click', () => {
+    const txid = document.getElementById('crypto-txid').value;
+    
+    if (!txid || txid.length < 20) {
+        alert("ERR: Invalid TXID provided.");
+        return;
+    }
+
+    if (selectedAmount === 0) {
+        alert("ERR: No pricing tier selected.");
+        return;
+    }
+
+    fetch(`${RENDER_BACKEND_URL}/verify_crypto`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            internal_txn_id: generatedTxnId,
+            blockchain_txid: txid,
+            amount: selectedAmount
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'logged') {
+            triggerCryptoBtn.disabled = true;
+            triggerCryptoBtn.style.opacity = '0.5';
+            triggerCryptoBtn.innerText = 'SUBMITTED';
+            document.getElementById('crypto-txid').disabled = true;
+            
+            alert(`VERIFICATION PENDING: Transaction ID ${generatedTxnId} logged. Manual on-chain reconciliation required. Activation may take up to 1 hour.`);
+        } else {
+            alert(`ERR: ${data.message}`);
+        }
+    })
+    .catch(error => {
+        console.error('Crypto Log Error:', error);
+        alert("NETWORK ERR: Failed to reach verification node.");
+    });
+});
+
+// --- CARD GATEWAY TOGGLE & INSTITUTIONAL BLOCK ---
+const showCardBtn = document.getElementById('show-card');
+const cardUi = document.getElementById('card-ui');
+const triggerCardBtn = document.getElementById('trigger-card');
+const cardNumberInput = document.getElementById('card-number');
+
+showCardBtn.addEventListener('click', () => {
+    cardUi.classList.remove('hidden');
+    mpesaUi.classList.add('hidden');
+    cryptoUi.classList.add('hidden');
+    showCardBtn.classList.add('active');
+    showMpesaBtn.classList.remove('active');
+    showCryptoBtn.classList.remove('active');
+});
+
+// Basic UI formatting for card number spaces
+cardNumberInput.addEventListener('input', (e) => {
+    let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+    let formattedValue = value.match(/.{1,4}/g);
+    e.target.value = formattedValue ? formattedValue.join(' ') : '';
+});
+
+// THE BLOCKOUT EXECUTION
+triggerCardBtn.addEventListener('click', () => {
+    if (selectedAmount === 0) {
+        alert("ERR: No pricing tier selected.");
+        return;
+    }
+
+    const existingModal = document.querySelector('.modal-overlay');
+    if (existingModal) existingModal.remove();
+
+    const modalHtml = `
+        <div class="modal-overlay" id="blockModal">
+            <div class="modal-box">
+                <h3>// ACCESS PROTOCOL VIOLATION</h3>
+                <p>
+                    Direct card processing is currently restricted to KYC-verified institutional nodes. 
+                    To bypass this restriction and execute via Corporate Wire, or to utilize our 
+                    available Crypto/M-Pesa tunnels, contact infrastructure support.
+                </p>
+                <button class="modal-close-btn" onclick="document.getElementById('blockModal').remove()">ACKNOWLEDGE</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+});
