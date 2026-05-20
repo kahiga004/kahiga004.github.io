@@ -16,6 +16,9 @@ const showCryptoBtn = document.getElementById('show-crypto');
 const triggerMpesaBtn = document.getElementById('trigger-mpesa');
 const triggerCryptoBtn = document.getElementById('trigger-crypto');
 const txnIdField = document.getElementById('txn-id');
+const leadName = document.getElementById('lead-name');
+const leadPhone = document.getElementById('lead-phone');
+const leadEmail = document.getElementById('lead-email');
 
 // --- CANVAS TERMINAL ANIMATION (PSYCHOLOGICAL OVERLOAD TACTIC) ---
 function resizeCanvas() {
@@ -126,12 +129,36 @@ function generateTxnId() {
 
 // --- MANUAL M-PESA TRIGGER ---
 triggerMpesaBtn.addEventListener('click', () => {
+    // 1. Lead Data Extraction & Gatekeeper
+    const name = leadName.value.trim();
+    const email = leadEmail.value.trim();
+    const phoneLead = leadPhone.value.trim();
+
+    if (!name || name.length < 2) {
+        alert("ERR: Full name is required.");
+        leadName.focus();
+        return;
+    }
+
+    if (!email || !email.includes('@') || !email.includes('.')) {
+        alert("ERR: Valid email address is required.");
+        leadEmail.focus();
+        return;
+    }
+
+    if (!phoneLead || phoneLead.length < 10) {
+        alert("ERR: Valid phone number is required.");
+        leadPhone.focus();
+        return;
+    }
+
+    // 2. Payment Specific Validation
     const phone = document.getElementById('mpesa-phone').value;
     const statusBox = document.getElementById('mpesa-status');
     
     if (!phone || phone.length < 10) {
         statusBox.classList.remove('hidden');
-        statusBox.innerHTML = "ERR: Invalid phone number format.";
+        statusBox.innerHTML = "ERR: Invalid M-Pesa phone number format.";
         statusBox.style.borderColor = 'var(--danger)';
         statusBox.style.color = 'var(--danger)';
         return;
@@ -155,6 +182,7 @@ triggerMpesaBtn.addEventListener('click', () => {
         return;
     }
 
+    // 3. Execution
     statusBox.classList.remove('hidden');
     statusBox.innerHTML = "PROCESSING: Logging settlement data...";
     statusBox.style.borderColor = 'var(--accent-cyan)';
@@ -169,7 +197,9 @@ triggerMpesaBtn.addEventListener('click', () => {
         body: JSON.stringify({
             internal_txn_id: generatedTxnId,
             mpesa_code: mpesaCode,
-            phone_number: phone,
+            lead_name: name,
+            lead_email: email,
+            lead_phone: phoneLead,
             amount: selectedAmount
         })
     })
@@ -179,6 +209,9 @@ triggerMpesaBtn.addEventListener('click', () => {
             triggerMpesaBtn.disabled = true;
             triggerMpesaBtn.innerText = 'SUBMITTED';
             document.getElementById('mpesa-phone').disabled = true;
+            leadName.disabled = true;
+            leadPhone.disabled = true;
+            leadEmail.disabled = true;
             statusBox.innerHTML = "SUBMITTED: Code logged. Reconciling with M-Pesa ledger. Activation pending.";
             statusBox.style.borderColor = 'var(--accent-gold)';
             statusBox.style.color = 'var(--accent-gold)';
@@ -198,6 +231,30 @@ triggerMpesaBtn.addEventListener('click', () => {
 
 // --- MANUAL CRYPTO VERIFICATION TRIGGER ---
 triggerCryptoBtn.addEventListener('click', () => {
+    // 1. Lead Data Extraction & Gatekeeper
+    const name = leadName.value.trim();
+    const email = leadEmail.value.trim();
+    const phoneLead = leadPhone.value.trim();
+
+    if (!name || name.length < 2) {
+        alert("ERR: Full name is required.");
+        leadName.focus();
+        return;
+    }
+
+    if (!email || !email.includes('@') || !email.includes('.')) {
+        alert("ERR: Valid email address is required.");
+        leadEmail.focus();
+        return;
+    }
+
+    if (!phoneLead || phoneLead.length < 10) {
+        alert("ERR: Valid phone number is required.");
+        leadPhone.focus();
+        return;
+    }
+
+    // 2. Payment Specific Validation
     const txid = document.getElementById('crypto-txid').value;
     
     if (!txid || txid.length < 20) {
@@ -210,6 +267,7 @@ triggerCryptoBtn.addEventListener('click', () => {
         return;
     }
 
+    // 3. Execution
     fetch(`${RENDER_BACKEND_URL}/verify_crypto`, {
         method: 'POST',
         headers: {
@@ -219,6 +277,9 @@ triggerCryptoBtn.addEventListener('click', () => {
         body: JSON.stringify({
             internal_txn_id: generatedTxnId,
             blockchain_txid: txid,
+            lead_name: name,
+            lead_email: email,
+            lead_phone: phoneLead,
             amount: selectedAmount
         })
     })
@@ -229,6 +290,9 @@ triggerCryptoBtn.addEventListener('click', () => {
             triggerCryptoBtn.style.opacity = '0.5';
             triggerCryptoBtn.innerText = 'SUBMITTED';
             document.getElementById('crypto-txid').disabled = true;
+            leadName.disabled = true;
+            leadPhone.disabled = true;
+            leadEmail.disabled = true;
             
             alert(`VERIFICATION PENDING: Transaction ID ${generatedTxnId} logged. Manual on-chain reconciliation required. Activation may take up to 1 hour.`);
         } else {
