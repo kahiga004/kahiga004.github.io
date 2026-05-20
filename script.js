@@ -2,6 +2,9 @@
 let selectedAmount = 0;
 let generatedTxnId = '';
 
+// --- HARDWARE ADDRESSES ---
+const RENDER_BACKEND_URL = 'https://ea-licence-server.onrender.com';
+
 // --- DOM ELEMENTS ---
 const canvas = document.getElementById('terminalCanvas');
 const ctx = canvas.getContext('2d');
@@ -54,19 +57,17 @@ function initLines() {
 initLines();
 
 function drawTerminal() {
-    // Semi-transparent black to create fading trail effect
     ctx.fillStyle = 'rgba(10, 10, 10, 0.1)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = '#00ff0080'; // Faded green
+    ctx.fillStyle = '#00ff0080'; 
     ctx.font = `${fontSize}px "Roboto Mono", "Courier New", monospace`;
 
     for (let i = 0; i < lines.length; i++) {
         let line = lines[i];
         ctx.fillText(line.text, 20, line.y);
-        line.y -= 0.5; // Slow scroll up
+        line.y -= 0.5; 
 
-        // Reset line if it goes off screen
         if (line.y < -fontSize) {
             line.y = canvas.height + fontSize;
             line.text = fakeData[Math.floor(Math.random() * fakeData.length)];
@@ -81,19 +82,14 @@ const pricingCards = document.querySelectorAll('.pricing-card');
 
 pricingCards.forEach(card => {
     card.addEventListener('click', () => {
-        // Remove selected state from all cards
         pricingCards.forEach(c => c.classList.remove('selected'));
-        // Add selected state to clicked card
         card.classList.add('selected');
         
-        // Extract amount and update UI
         selectedAmount = parseInt(card.getAttribute('data-amount'));
         checkoutDisplay.textContent = `$${selectedAmount}.00`;
         
-        // Generate a new crypto transaction ID whenever a tier is selected
         generateTxnId();
         
-        // Smooth scroll to checkout
         document.getElementById('checkout').scrollIntoView({ behavior: 'smooth' });
     });
 });
@@ -102,163 +98,21 @@ pricingCards.forEach(card => {
 showMpesaBtn.addEventListener('click', () => {
     mpesaUi.classList.remove('hidden');
     cryptoUi.classList.add('hidden');
+    document.getElementById('card-ui').classList.add('hidden');
     showMpesaBtn.classList.add('active');
     showCryptoBtn.classList.remove('active');
+    document.getElementById('show-card').classList.remove('active');
 });
 
 showCryptoBtn.addEventListener('click', () => {
     cryptoUi.classList.remove('hidden');
     mpesaUi.classList.add('hidden');
+    document.getElementById('card-ui').classList.add('hidden');
     showCryptoBtn.classList.add('active');
     showMpesaBtn.classList.remove('active');
+    document.getElementById('show-card').classList.remove('active');
 });
 
 // --- UTILITY: RANDOM ALPHANUMERIC GENERATOR ---
 function generateTxnId() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < 16; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    generatedTxnId = result;
-    txnIdField.value = generatedTxnId;
-}
-
-// --- M-PESA TRIGGER (Awaiting Part 2 Integration) ---
-triggerMpesaBtn.addEventListener('click', () => {
-    const phone = document.getElementById('mpesa-phone').value;
-    const statusBox = document.getElementById('mpesa-status');
-    
-    if (!phone || phone.length < 10) {
-        statusBox.classList.remove('hidden');
-        statusBox.innerHTML = "ERR: Invalid phone number format.";
-        statusBox.style.borderColor = 'var(--danger)';
-        statusBox.style.color = 'var(--danger)';
-        return;
-    }
-
-    if (selectedAmount === 0) {
-        statusBox.classList.remove('hidden');
-        statusBox.innerHTML = "ERR: No pricing tier selected.";
-        statusBox.style.borderColor = 'var(--danger)';
-        statusBox.style.color = 'var(--danger)';
-        return;
-    }
-
-    statusBox.classList.remove('hidden');
-    statusBox.innerHTML = "PROCESSING: Sending STK Push to device...";
-    statusBox.style.borderColor = 'var(--accent-cyan)';
-    statusBox.style.color = 'var(--accent-cyan)';
-
-       // --- MANUAL CRYPTO VERIFICATION EXECUTION ---
-    const renderBackendUrl = 'https://ea-licence-server.onrender.com'; // REPLACE WITH YOUR RENDER URL
-
-    fetch(`${renderBackendUrl}/verify_crypto`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-            internal_txn_id: generatedTxnId,
-            blockchain_txid: txid,
-            amount: selectedAmount
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'logged') {
-            // Success: Data captured. Now lock the UI and tell them to wait.
-            triggerCryptoBtn.disabled = true;
-            triggerCryptoBtn.style.opacity = '0.5';
-            triggerCryptoBtn.innerText = 'SUBMITTED';
-            document.getElementById('crypto-txid').disabled = true;
-            
-            alert(`VERIFICATION PENDING: Transaction ID ${generatedTxnId} logged. Manual on-chain reconciliation required. Do not close this page. Activation may take up to 1 hour.`);
-        } else {
-            alert(`ERR: ${data.message}`);
-        }
-    })
-    .catch(error => {
-        console.error('Crypto Log Error:', error);
-        alert("NETWORK ERR: Failed to reach verification node.");
-    });
-});
-
-// --- CRYPTO MANUAL VERIFICATION TRIGGER (Awaiting Part 3 Integration) ---
-triggerCryptoBtn.addEventListener('click', () => {
-    const txid = document.getElementById('crypto-txid').value;
-    
-    if (!txid || txid.length < 20) {
-        alert("ERR: Invalid TXID provided.");
-        return;
-    }
-
-    if (selectedAmount === 0) {
-        alert("ERR: No pricing tier selected.");
-        return;
-    }
-
-
-    /* 
-    ---------------------------------------------------------
-    PLACEHOLDER INTERCEPT FOR PART 3
-    The fetch() call to the /verify_crypto endpoint will be 
-    injected here in Part 3.
-    ---------------------------------------------------------
-    */
-    console.log(`Crypto Verification Initiated. Internal TXN ID: ${generatedTxnId} | Blockchain TXID: ${txid}`);
-    alert("Verification request sent to server. Manual approval pending.");
-});
-
-// --- CARD GATEWAY TOGGLE & INSTITUTIONAL BLOCK ---
-const showCardBtn = document.getElementById('show-card');
-const cardUi = document.getElementById('card-ui');
-const triggerCardBtn = document.getElementById('trigger-card');
-const cardNumberInput = document.getElementById('card-number');
-
-showCardBtn.addEventListener('click', () => {
-    cardUi.classList.remove('hidden');
-    mpesaUi.classList.add('hidden');
-    cryptoUi.classList.add('hidden');
-    showCardBtn.classList.add('active');
-    showMpesaBtn.classList.remove('active');
-    showCryptoBtn.classList.remove('active');
-});
-
-// Basic UI formatting for card number spaces
-cardNumberInput.addEventListener('input', (e) => {
-    let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
-    let formattedValue = value.match(/.{1,4}/g);
-    e.target.value = formattedValue ? formattedValue.join(' ') : '';
-});
-
-// THE BLOCKOUT EXECUTION
-triggerCardBtn.addEventListener('click', () => {
-    if (selectedAmount === 0) {
-        alert("ERR: No pricing tier selected.");
-        return;
-    }
-
-    // Remove any existing modal
-    const existingModal = document.querySelector('.modal-overlay');
-    if (existingModal) existingModal.remove();
-
-    // Construct the Institutional Block Modal
-    const modalHtml = `
-        <div class="modal-overlay" id="blockModal">
-            <div class="modal-box">
-                <h3>// ACCESS PROTOCOL VIOLATION</h3>
-                <p>
-                    Direct card processing is currently restricted to KYC-verified institutional nodes. 
-                    To bypass this restriction and execute via Corporate Wire, or to utilize our 
-                    available Crypto/M-Pesa tunnels, contact infrastructure support.
-                </p>
-                <button class="modal-close-btn" onclick="document.getElementById('blockModal').remove()">ACKNOWLEDGE</button>
-            </div>
-        </div>
-    `;
-    
-    // Inject into DOM
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-});
+    const chars
