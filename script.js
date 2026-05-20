@@ -150,13 +150,39 @@ triggerMpesaBtn.addEventListener('click', () => {
     statusBox.style.borderColor = 'var(--accent-cyan)';
     statusBox.style.color = 'var(--accent-cyan)';
 
-    /* 
-    ---------------------------------------------------------
-    PLACEHOLDER INTERCEPT FOR PART 2
-    The actual fetch() call to your Render backend will be 
-    injected here in Part 2 of this build.
-    ---------------------------------------------------------
-    */
+       // --- MANUAL CRYPTO VERIFICATION EXECUTION ---
+    const renderBackendUrl = 'https://ea-licence-server.onrender.com'; // REPLACE WITH YOUR RENDER URL
+
+    fetch(`${renderBackendUrl}/verify_crypto`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            internal_txn_id: generatedTxnId,
+            blockchain_txid: txid,
+            amount: selectedAmount
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'logged') {
+            // Success: Data captured. Now lock the UI and tell them to wait.
+            triggerCryptoBtn.disabled = true;
+            triggerCryptoBtn.style.opacity = '0.5';
+            triggerCryptoBtn.innerText = 'SUBMITTED';
+            document.getElementById('crypto-txid').disabled = true;
+            
+            alert(`VERIFICATION PENDING: Transaction ID ${generatedTxnId} logged. Manual on-chain reconciliation required. Do not close this page. Activation may take up to 1 hour.`);
+        } else {
+            alert(`ERR: ${data.message}`);
+        }
+    })
+    .catch(error => {
+        console.error('Crypto Log Error:', error);
+        alert("NETWORK ERR: Failed to reach verification node.");
+    });
 });
 
 // --- CRYPTO MANUAL VERIFICATION TRIGGER (Awaiting Part 3 Integration) ---
