@@ -623,3 +623,46 @@ code {
         gap: 15px;
     }
 }
+
+/* --- INFRASTRUCTURE MODULE --- */
+.infra-module {
+    background: #0d0d0d;
+    border-top: 1px solid #1a1a1a;
+    border-bottom: 1px solid #1a1a1a;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.infra-header {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent-cyan);
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+}
+
+.infra-content p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    max-width: 600px;
+    margin: 0 auto 25px auto;
+    line-height: 1.6;
+}
+
+.infra-btn {
+    display: inline-block;
+    background: transparent;
+    border: 1px solid var(--accent-gold);
+    color: var(--accent-gold);
+    padding: 12px 30px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.infra-btn:hover {
+    background: var(--accent-gold);
+    color: #000;
+}
