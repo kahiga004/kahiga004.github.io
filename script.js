@@ -213,7 +213,6 @@ triggerMpesaBtn.addEventListener('click', () => {
     });
 });
 // --- MANUAL CRYPTO VERIFICATION TRIGGER ---
-// --- MANUAL CRYPTO VERIFICATION TRIGGER ---
 triggerCryptoBtn.addEventListener('click', () => {
     // 1. Lead Data Extraction & Gatekeeper
     const name = leadName.value.trim();
@@ -280,7 +279,6 @@ triggerCryptoBtn.addEventListener('click', () => {
         alert("NETWORK ERR: Failed to reach verification node.");
     });
 });
-
 // --- CARD GATEWAY TOGGLE & INSTITUTIONAL BLOCK ---
 const showCardBtn = document.getElementById('show-card');
 const cardUi = document.getElementById('card-ui');
