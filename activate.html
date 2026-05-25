@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HWID Activation Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #0a0a0a; --text: #e0e0e0; --accent: #00ffff; --danger: #ff3333; --font: 'Inter', sans-serif; --mono: 'Roboto Mono', monospace; }
+        body { background: var(--bg); color: var(--text); font-family: var(--font); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: #111; padding: 40px; border: 1px solid #222; max-width: 500px; width: 90%; text-align: center; }
+        h2 { font-family: var(--mono); color: var(--accent); font-size: 1.2rem; margin-bottom: 10px; }
+        p { color: #888; font-size: 0.9rem; margin-bottom: 30px; }
+        input { width: 100%; padding: 15px; background: #0a0a0a; border: 1px solid #333; color: var(--text); font-family: var(--mono); box-sizing: border-box; outline: none; margin-bottom: 20px; }
+        input:focus { border-color: var(--accent); }
+        button { width: 100%; padding: 15px; background: var(--accent); color: #000; border: none; font-family: var(--mono); font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { opacity: 0.8; }
+        #status { margin-top: 20px; font-family: var(--mono); font-size: 0.85rem; }
+        .success { color: #00ff00; }
+        .error { color: var(--danger); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>// LICENSE BINDING TERMINAL</h2>
+        <p>Enter the Hardware ID (HWID) provided by the EA in MetaTrader 4.</p>
+        <input type="text" id="hwid" placeholder="e.g., A1B2-C3D4-E5F6-G7H8">
+        <button onclick="activateLicense()">BIND TO INFRASTRUCTURE</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        // THIS URL MUST POINT TO YOUR RENDER SAAS RETAIL API
+        const SAAS_API = 'https://ea-licence-server.onrender.com/retail/api/add';
+
+        function activateLicense() {
+            const hwid = document.getElementById('hwid').value.trim();
+            const statusDiv = document.getElementById('status');
+
+            if (!hwid || hwid.length < 10) {
+                statusDiv.className = 'error';
+                statusDiv.innerText = "ERR: Invalid HWID format.";
+                return;
+            }
+
+            statusDiv.className = '';
+            statusDiv.innerText = "PROCESSING: Contacting licensing matrix...";
+
+            // WARNING: This route requires Master Admin session authentication on Render.
+            // If you want users to do this THEMSELVES without logging into your SaaS dashboard, 
+            // we must create a public, unauthenticated endpoint on your Render backend.
+            // For now, we will attempt the call to show you the mechanics.
+
+            fetch(SAAS_API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ hwid: hwid, months: 1 })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    statusDiv.className = 'success';
+                    statusDiv.innerText = "SUCCESS: Node bound. Restart MetaTrader 4.";
+                } else {
+                    statusDiv.className = 'error';
+                    statusDiv.innerText = `ERR: ${data.message}`;
+                }
+            })
+            .catch(err => {
+                statusDiv.className = 'error';
+                statusDiv.innerText = "NETWORK ERR: Cannot reach licensing server (Likely blocked by SaaS login requirement).";
+            });
+        }
+    </script>
+</body>
+</html>
