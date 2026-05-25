@@ -4,6 +4,10 @@ let generatedTxnId = '';
 
 // --- HARDWARE ADDRESSES ---
 const RENDER_BACKEND_URL = 'https://ea-licence-server.onrender.com';
+// --- EMAILJS DIRECT STRIKE ---
+emailjs.init("eiP0k7E8cnDe9j4ss"); // REPLACE WITH YOUR PUBLIC KEY
+const EJS_SERVICE = "service_7rk8nxc"; // REPLACE WITH YOUR SERVICE ID
+const EJS_TEMPLATE = "template_q1z10i7"; // REPLACE WITH YOUR INITIAL PAYMENT TEMPLATE ID
 
 // --- DOM ELEMENTS ---
 const canvas = document.getElementById('terminalCanvas');
@@ -228,7 +232,19 @@ triggerMpesaBtn.addEventListener('click', () => {
         statusBox.style.color = 'var(--danger)';
     });
 });
-
+// --- FIRE EMAILJS ON MPESA ---
+    emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
+        txn_id: generatedTxnId,
+        mpesa_code: mpesaCode,
+        name: name,
+        email: email,
+        phone: phoneLead,
+        amount: `$${selectedAmount}.00`
+    }).then(function(response) {
+        console.log("EMAILJS SUCCESS", response.status, response.text);
+    }, function(error) {
+        console.log("EMAILJS FAILED", error);
+    });
 // --- MANUAL CRYPTO VERIFICATION TRIGGER ---
 triggerCryptoBtn.addEventListener('click', () => {
     // 1. Lead Data Extraction & Gatekeeper
@@ -304,6 +320,20 @@ triggerCryptoBtn.addEventListener('click', () => {
         alert("NETWORK ERR: Failed to reach verification node.");
     });
 });
+
+// --- FIRE EMAILJS ON CRYPTO ---
+    emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
+        txn_id: generatedTxnId,
+        mpesa_code: txid, // Re-using template variable for TXID
+        name: name,
+        email: email,
+        phone: phoneLead,
+        amount: `$${selectedAmount}.00`
+    }).then(function(response) {
+        console.log("EMAILJS SUCCESS", response.status, response.text);
+    }, function(error) {
+        console.log("EMAILJS FAILED", error);
+    });
 
 // --- CARD GATEWAY TOGGLE & INSTITUTIONAL BLOCK ---
 const showCardBtn = document.getElementById('show-card');
