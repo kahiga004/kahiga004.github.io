@@ -213,50 +213,27 @@ triggerMpesaBtn.addEventListener('click', () => {
     });
 });
 // --- MANUAL CRYPTO VERIFICATION TRIGGER ---
+// --- MANUAL CRYPTO VERIFICATION TRIGGER ---
 triggerCryptoBtn.addEventListener('click', () => {
     // 1. Lead Data Extraction & Gatekeeper
     const name = leadName.value.trim();
     const email = leadEmail.value.trim();
     const phoneLead = leadPhone.value.trim();
 
-    if (!name || name.length < 2) {
-        alert("ERR: Full name is required.");
-        leadName.focus();
-        return;
-    }
-
-    if (!email || !email.includes('@') || !email.includes('.')) {
-        alert("ERR: Valid email address is required.");
-        leadEmail.focus();
-        return;
-    }
-
-    if (!phoneLead || phoneLead.length < 10) {
-        alert("ERR: Valid phone number is required.");
-        leadPhone.focus();
-        return;
-    }
+    if (!name || name.length < 2) { alert("ERR: Full name is required."); leadName.focus(); return; }
+    if (!email || !email.includes('@') || !email.includes('.')) { alert("ERR: Valid email address is required."); leadEmail.focus(); return; }
+    if (!phoneLead || phoneLead.length < 10) { alert("ERR: Valid phone number is required."); leadPhone.focus(); return; }
 
     // 2. Payment Specific Validation
     const txid = document.getElementById('crypto-txid').value;
     
-    if (!txid || txid.length < 20) {
-        alert("ERR: Invalid TXID provided.");
-        return;
-    }
-
-    if (selectedAmount === 0) {
-        alert("ERR: No pricing tier selected.");
-        return;
-    }
+    if (!txid || txid.length < 20) { alert("ERR: Invalid TXID provided."); return; }
+    if (selectedAmount === 0) { alert("ERR: No pricing tier selected."); return; }
 
     // 3. Execution
     fetch(`${RENDER_BACKEND_URL}/verify_crypto`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({
             internal_txn_id: generatedTxnId,
             blockchain_txid: txid,
@@ -277,7 +254,23 @@ triggerCryptoBtn.addEventListener('click', () => {
             leadPhone.disabled = true;
             leadEmail.disabled = true;
             
-            alert(`VERIFICATION PENDING: Transaction ID ${generatedTxnId} logged. Manual on-chain reconciliation required. Activation may take up to 1 hour.`);
+            alert(`VERIFICATION PENDING: Transaction ID ${generatedTxnId} logged.`);
+
+            // --- STRIKE 1: EMAILJS ---
+            console.log("EXECUTING CRYPTO EMAILJS STRIKE...");
+            emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
+                txn_id: generatedTxnId,
+                mpesa_code: txid, // Feeding TXID into the template's M-Pesa/Crypto code slot
+                name: name,
+                email: email,
+                phone: phoneLead,
+                amount: `$${selectedAmount}.00`
+            }).then(function(response) {
+                console.log("CRYPTO EMAILJS SUCCESS:", response.status, response.text);
+            }, function(error) {
+                console.error("CRYPTO EMAILJS FAILED:", error);
+            });
+            
         } else {
             alert(`ERR: ${data.message}`);
         }
@@ -287,20 +280,6 @@ triggerCryptoBtn.addEventListener('click', () => {
         alert("NETWORK ERR: Failed to reach verification node.");
     });
 });
-
-// --- FIRE EMAILJS ON CRYPTO ---
-    emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
-        txn_id: generatedTxnId,
-        mpesa_code: txid, // Re-using template variable for TXID
-        name: name,
-        email: email,
-        phone: phoneLead,
-        amount: `$${selectedAmount}.00`
-    }).then(function(response) {
-        console.log("EMAILJS SUCCESS", response.status, response.text);
-    }, function(error) {
-        console.log("EMAILJS FAILED", error);
-    });
 
 // --- CARD GATEWAY TOGGLE & INSTITUTIONAL BLOCK ---
 const showCardBtn = document.getElementById('show-card');
