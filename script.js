@@ -132,59 +132,26 @@ function generateTxnId() {
 }
 
 // --- MANUAL M-PESA TRIGGER ---
+// --- MANUAL M-PESA TRIGGER ---
 triggerMpesaBtn.addEventListener('click', () => {
     // 1. Lead Data Extraction & Gatekeeper
     const name = leadName.value.trim();
     const email = leadEmail.value.trim();
     const phoneLead = leadPhone.value.trim();
 
-    if (!name || name.length < 2) {
-        alert("ERR: Full name is required.");
-        leadName.focus();
-        return;
-    }
-
-    if (!email || !email.includes('@') || !email.includes('.')) {
-        alert("ERR: Valid email address is required.");
-        leadEmail.focus();
-        return;
-    }
-
-    if (!phoneLead || phoneLead.length < 10) {
-        alert("ERR: Valid phone number is required.");
-        leadPhone.focus();
-        return;
-    }
+    if (!name || name.length < 2) { alert("ERR: Full name is required."); leadName.focus(); return; }
+    if (!email || !email.includes('@') || !email.includes('.')) { alert("ERR: Valid email address is required."); leadEmail.focus(); return; }
+    if (!phoneLead || phoneLead.length < 10) { alert("ERR: Valid phone number is required."); leadPhone.focus(); return; }
 
     // 2. Payment Specific Validation
     const phone = document.getElementById('mpesa-phone').value;
     const statusBox = document.getElementById('mpesa-status');
     
-    if (!phone || phone.length < 10) {
-        statusBox.classList.remove('hidden');
-        statusBox.innerHTML = "ERR: Invalid M-Pesa phone number format.";
-        statusBox.style.borderColor = 'var(--danger)';
-        statusBox.style.color = 'var(--danger)';
-        return;
-    }
-
-    if (selectedAmount === 0) {
-        statusBox.classList.remove('hidden');
-        statusBox.innerHTML = "ERR: No pricing tier selected.";
-        statusBox.style.borderColor = 'var(--danger)';
-        statusBox.style.color = 'var(--danger)';
-        return;
-    }
+    if (!phone || phone.length < 10) { statusBox.classList.remove('hidden'); statusBox.innerHTML = "ERR: Invalid M-Pesa phone number format."; statusBox.style.borderColor = 'var(--danger)'; statusBox.style.color = 'var(--danger)'; return; }
+    if (selectedAmount === 0) { statusBox.classList.remove('hidden'); statusBox.innerHTML = "ERR: No pricing tier selected."; statusBox.style.borderColor = 'var(--danger)'; statusBox.style.color = 'var(--danger)'; return; }
 
     const mpesaCode = prompt("Enter the M-Pesa Confirmation Code sent to your phone (e.g., SHK4Y5X7GZ):");
-
-    if (!mpesaCode || mpesaCode.length < 8) {
-        statusBox.classList.remove('hidden');
-        statusBox.innerHTML = "ERR: Invalid or empty M-Pesa code.";
-        statusBox.style.borderColor = 'var(--danger)';
-        statusBox.style.color = 'var(--danger)';
-        return;
-    }
+    if (!mpesaCode || mpesaCode.length < 8) { statusBox.classList.remove('hidden'); statusBox.innerHTML = "ERR: Invalid or empty M-Pesa code."; statusBox.style.borderColor = 'var(--danger)'; statusBox.style.color = 'var(--danger)'; return; }
 
     // 3. Execution
     statusBox.classList.remove('hidden');
@@ -194,10 +161,7 @@ triggerMpesaBtn.addEventListener('click', () => {
 
     fetch(`${RENDER_BACKEND_URL}/verify_mpesa`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({
             internal_txn_id: generatedTxnId,
             mpesa_code: mpesaCode,
@@ -219,6 +183,22 @@ triggerMpesaBtn.addEventListener('click', () => {
             statusBox.innerHTML = "SUBMITTED: Code logged. Reconciling with M-Pesa ledger. Activation pending.";
             statusBox.style.borderColor = 'var(--accent-gold)';
             statusBox.style.color = 'var(--accent-gold)';
+
+            // --- STRIKE 1: EMAILJS ---
+            console.log("EXECUTING EMAILJS STRIKE...");
+            emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
+                txn_id: generatedTxnId,
+                mpesa_code: mpesaCode,
+                name: name,
+                email: email,
+                phone: phoneLead,
+                amount: `$${selectedAmount}.00`
+            }).then(function(response) {
+                console.log("EMAILJS SUCCESS:", response.status, response.text);
+            }, function(error) {
+                console.error("EMAILJS FAILED:", error);
+            });
+
         } else {
             statusBox.innerHTML = `ERR: ${data.message}`;
             statusBox.style.borderColor = 'var(--danger)';
@@ -232,19 +212,6 @@ triggerMpesaBtn.addEventListener('click', () => {
         statusBox.style.color = 'var(--danger)';
     });
 });
-// --- FIRE EMAILJS ON MPESA ---
-    emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
-        txn_id: generatedTxnId,
-        mpesa_code: mpesaCode,
-        name: name,
-        email: email,
-        phone: phoneLead,
-        amount: `$${selectedAmount}.00`
-    }).then(function(response) {
-        console.log("EMAILJS SUCCESS", response.status, response.text);
-    }, function(error) {
-        console.log("EMAILJS FAILED", error);
-    });
 // --- MANUAL CRYPTO VERIFICATION TRIGGER ---
 triggerCryptoBtn.addEventListener('click', () => {
     // 1. Lead Data Extraction & Gatekeeper
